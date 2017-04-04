@@ -1,0 +1,11 @@
+Proteogenomics list file name > /Users/anb013/Data_for_validation/pride/peptide_list.txt
+Database search file name > /Users/anb013/Data_for_validation/pride/PRIDE_Exp_Complete_Ac_30823.pride.mztab
+mgf file name > /Users/anb013/Data_for_validation/pride/PRIDE_Exp_Complete_Ac_30823.pride.mgf
+Output file name > /Users/anb013/Data_for_validation/pride/new_out_modified
+
+
+Proteogenomics list file name > /Users/anb013/Data_for_validation/nunos_enosi_small/ENOSIC2-351fe3a9-group_by_event-main.tsv
+Database search file name > /Users/anb013/Data_for_validation/nunos_enosi_small/result/Novel.txt
+mgf file name > /Users/anb013/Data_for_validation/nunos_enosi_small/specs_ms_20633acb.mgf
+Output file name > /Users/anb013/Data_for_validation/nunos_enosi_small/updated_output_new
+
