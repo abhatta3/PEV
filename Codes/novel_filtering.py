@@ -52,7 +52,7 @@ def main(argv):
                 
             novel[line[0]]={'type':line[1], 'seq':pepseq,'n':True,'id':'','seqold':line[2]}
 
-    with open("./Data/alternate.fasta80.tab","r") as sf:
+    with open("./Data/alternate.fasta.tab","r") as sf:
         for line in sf:
             if '#' in line:
                 continue
