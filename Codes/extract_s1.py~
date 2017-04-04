@@ -1,0 +1,93 @@
+import os
+import os.path
+import sys
+import time
+start_time = time.time()
+
+
+inputevent=sys.argv[1] #"/Users/anb013/Validation_of_Modification_Model/Data/Colon_Proteogenomic_Events.txt"
+scanf=sys.argv[2] #"/Users/anb013/Validation_of_Modification_Model/Data/VU_All_Combined_SPECFDR01.txt"
+spec_outfile=sys.argv[3] #'/Users/anb013/Validation_of_Modification_Model/Data/extract_spec_on_scan_fixed.mgf'
+soutput=open(spec_outfile,"w")
+spec_map_outfile=spec_outfile+'.map.txt' #'/Users/anb013/Validation_of_Modification_Model/Data/Scan_files_fixed.txt'
+output=open(spec_map_outfile,"w")
+spec_dir=sys.argv[4] #'/data/ccms_research_data/CPTAC/MSSpectra/VU/mgf/'
+
+pep={}
+
+with open(inputevent,"r") as inputfile:
+    for line in inputfile:
+        if '#' in line:
+            continue
+        line=line.strip().split('\t')
+        pepseq=line[2].split('.')[1].translate(None, '1234567890._:-*!@#$?')
+        if pep.has_key(pepseq):
+            old=pep[pepseq]
+            old.append(line[0])
+            pep[pepseq]=old
+        else:
+            pep[pepseq]=[line[0]]
+            
+event_scan={}
+with open(scanf,"r") as sf:
+    for line in sf:
+        if '#' in line:
+            continue
+        line=line.strip().split('\t')
+        pepseq=line[8].split('.')[1].translate(None, '1234567890._:-*!@#$?')
+        fname=line[0]
+        spec_evalue=line[12]
+        scan=int(line[2])
+        if pep.has_key(pepseq):
+            pev=pep[pepseq]
+            if event_scan.has_key(fname):
+                sdic=event_scan[fname]
+                sdic[scan]={'p':pev,'e':spec_evalue}
+                event_scan[fname]=sdic
+            else:
+                t={'p':pev,'e':spec_evalue}
+                sdic={scan:t}
+                event_scan[fname]=sdic
+                
+
+newscanno=0
+#output.write("%s\t%s\t%s\n" %(pep[pepseq],fname,scan))
+output.write("#Event\tFile_name\tOriginal_scan_number\tNnew_scan_number\tSpecEvalue\n")            
+for fname in event_scan:
+    scanlist=event_scan[fname]
+    PATH=spec_dir+fname
+    flag=0
+    if os.path.isfile(PATH) and os.access(PATH, os.R_OK):
+        with open(PATH,"r") as mgf:
+            scanindex=0
+            for line in mgf:
+                if 'scan=' in line:
+                    if scanlist.has_key(scanindex):
+                        pev=event_scan[fname][scanindex]['p']
+                        evalue=event_scan[fname][scanindex]['e']
+                        output.write("%s" %(pev[0]))
+                        if len(pev)>1:
+                            for itm in pev[1:]:
+                                output.write(",%s" %(itm))
+                        output.write("\t%s\t%d\t%d\t%s\n" %(fname,scanindex,newscanno,evalue))
+                        newscanno+=1
+                        soutput.write("BEGIN IONS\n")
+                        soutput.write(line)
+                        flag=1
+                    scanindex+=1
+                elif flag==1 and 'END IONS' not in line:
+                    soutput.write(line)
+                elif flag==1 and 'END IONS' in line:
+                    soutput.write(line)
+                    flag=0
+ 
+       
+soutput.close()
+output.close()
+                
+                                
+                                
+                                
+print("Executes in --- %s seconds ---" %(time.time() - start_time))
+
+        
