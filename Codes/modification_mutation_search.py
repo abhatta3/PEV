@@ -6,8 +6,7 @@ import time
 
 #delta=50.0 #ppm
 #keylenth=4
-most_common_mod={15.994915:'M',14.015650:'K',-17.026549:'Q',79.966331:'S,T,Y',43.005814:'*',42.010565:'*',0.984016:'N,Q'}
-
+#most_common_mod={15.994915:'M',14.015650:'K',-17.026549:'Q',79.966331:'S,T,Y',43.005814:'*',42.010565:'*',0.984016:'N,Q'}
 # Oxidation	+15.994915	M	OPTIONAL
 # Lysine Methylation	+14.015650	K	OPTIONAL
 # Pyroglutamate Formation	-17.026549	Q	OPTIONAL, N-TERMINAL
@@ -90,10 +89,10 @@ def create_pep_table(inputf,keylenth,delta):
             if pep_dic_by_event.has_key(line[0]):
                 if len(pep_dic_by_event[line[0]])<kw_l:
                     pep_dic_by_event[line[0]]=kw
-                    peptide_dic[line[0]]={'NP':line[2],'rN':line[1],'scan':line[8],'pos':line[5].index(kw),'lsupport':line[9]}
+                    peptide_dic[line[0]]={'NP':line[2],'rN':line[1],'scan':line[8],'pos':line[5].index(kw),'lsupport':line[9],'pmass':float(line[3])}
             else:
                 pep_dic_by_event[line[0]]=kw
-                peptide_dic[line[0]]={'NP':line[2],'rN':line[1],'scan':line[8],'pos':line[5].index(kw),'lsupport':line[9]}
+                peptide_dic[line[0]]={'NP':line[2],'rN':line[1],'scan':line[8],'pos':line[5].index(kw),'lsupport':line[9],'pmass':float(line[3])}
     count=0
     total=0
     for ln in pep_dic_by_event:
@@ -277,22 +276,25 @@ def get_extended_search_result(seq,uid,peptide_dic,mode_detail,modific,mass_dic,
         tmp_pep_dic=peptide_dic[kw_ev]
         NPeptide=tmp_pep_dic['NP']
         rNPeptide=tmp_pep_dic['rN']
+        pmass=tmp_pep_dic['pmass']
         #scanno=tmp_pep_dic['scan']
         #lefti=tmp_pep_dic['pos']
         key_word=kw_dic['k']
         #righti=len(NPeptide)-lefti+len(key_word)
         #newPeptide='.+?'+kw_dic['k']+'.+?'
-        mut_mass=comput_mass(NPeptide,mass_dic)
+        if pmass>1.0:
+            mut_mass=pmass
+        else:
+            mut_mass=comput_mass(NPeptide,mass_dic)
+            
         v_delta=comput_delta(mut_mass,delta)
         lookforpep = find_match(seq,key_word) 
         #continue
         pep_length=len(NPeptide)
-        min_l=pep_length-2
-        max_l=pep_length+2
-        
+        min_l=pep_length-3
+        max_l=pep_length+3
         minl=len(seq)
         maxr=0
-        
         for new_Ref_Ppeptide in lookforpep:
             if key_word in new_Ref_Ppeptide: 
                 new_pep_l=len(new_Ref_Ppeptide)
@@ -338,45 +340,6 @@ def get_extended_search_result(seq,uid,peptide_dic,mode_detail,modific,mass_dic,
                             minl=l_b
                         if r_e>maxr:
                             maxr=r_e
-                    elif abs(diff)<200.0:
-                        for msk in most_common_mod:
-                            arsd=most_common_mod[msk]
-                            llist=arsd.split(',')
-                            flg=0
-                            for w in llist:
-                                if w=='*' or w in NPeptide:
-                                    flg=1
-                                    break
-                            if flg==1:
-                                diff=mut_mass+msk-new_Ref_mass
-                                idiff=int(diff)
-                                idiff1=idiff+1
-                                idiff2=idiff-1
-                                
-                                if modific.has_key(idiff):
-                                    score=modific[idiff]
-                                elif modific.has_key(idiff1):
-                                    score=modific[idiff1]
-                                elif modific.has_key(idiff2):
-                                    score=modific[idiff2]
-                                else:
-                                    continue
-                                if abs(score-diff)<v_delta:
-                                    mitem=mode_detail[score]
-                                    for litem in mitem:
-                                        llist=litem.split(',')
-                                        w=llist[0]
-                                        if w=='*' or w in new_Ref_Ppeptide:
-                                            outf.write("%s|%s|%s|" %(kw_ev,rNPeptide,key_word))
-                                            outf.write("?R+MOD|%s|%f|%s\t%s\n" %(uid,score,litem,new_Ref_Ppeptide))
-                                            l_b=seq.index(new_Ref_Ppeptide)
-                                            r_e=l_b+new_pep_l
-                                            if l_b<minl:
-                                                minl=l_b
-                                            if r_e>maxr:
-                                                maxr=r_e
-        
-                                            break
                                     
         if maxr>minl:
             minl-=1

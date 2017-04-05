@@ -29,6 +29,8 @@ NumMods=1
 # 	- For proper mzIdentML output, this name should be the same as the Unimod PSI-MS name
 # 	- E.g. Phospho, Acetyl
 # 	- Visit http://www.unimod.org to get PSI-MS names.
+#C2H2O,*,opt,Prot-N-term,Acetyl			# Acetylation Protein N-term
+#C2H2O1,K,opt,any,Acetyl			# Acetylation K
 
 C2H3N1O1,C,fix,any,Carbamidomethyl 		# Fixed Carbamidomethyl C
 
@@ -39,8 +41,8 @@ C2H3NO,*,opt,N-term,Carbamidomethyl		# Variable Carbamidomethyl N-term
 C2H3NO,KH,opt,any,Carbamidomethyl		# Variable Carbamidomethyl K
 H-2O-1,E,opt,N-term,Glu->pyro-Glu			# Pyro-glu from E
 H-3N-1,Q,opt,N-term,Gln->pyro-Glu			# Pyro-glu from Q
-C2H2O,*,opt,Prot-N-term,Acetyl			# Acetylation Protein N-term
-C2H2O1,K,opt,any,Acetyl			# Acetylation K
+42.01056,*,opt,Prot-N-term,Acetyl			# Acetylation Protein N-term
+42.01056,K,opt,any,Acetyl			# Acetylation K 
 CH2,HDEKR,opt,any,Methyl				# Methylation
 HO3P,STY,opt,any,Phospho			# Phosphorylation STY
 31.989829,MW,opt,any,Dioxidation

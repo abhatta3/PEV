@@ -236,9 +236,9 @@ def get_key(argv):
     with open(scanfile,"r") as sf:
         matched=False
         for line in sf:
-           if '=' in line:
-               continue
            if 'BEGIN IONS' in line:
+               pepmass=0.0
+               pcharge=1.0
                scan_i+=1
                scand={}
                slist=[]
@@ -251,7 +251,12 @@ def get_key(argv):
                else:
                    matched=False
             
-           elif 'END IONS' not in line and matched==True:
+           elif 'END IONS' not in line and matched==True and '=' in line:
+               if "PEPMASS" in line:
+                   pepmass=float(line.strip().split('=')[1])
+               elif "CHARGE" in line:
+                   pcharge=float(line.strip().split('=')[1].split('+')[0])
+           elif 'END IONS' not in line and matched==True and '=' not in line:
                line=line.strip().split()
                if len(line)>=2:
                    xval=float(line[0])
@@ -274,11 +279,11 @@ def get_key(argv):
                            scand[li]={'y':yval,'x':xval}
                pm=delta
                pd=get_position_mass(pep,scand,pm)
-               
+               adjusted_mass=pepmass*pcharge-pcharge+1
                if eventsupport.has_key(event):
-                   eventsupport[event].append({'count':pd[1],'s':pep,'su':pd[0],'sno':scan_i,'ubit':pd[2]})
+                   eventsupport[event].append({'count':pd[1],'s':pep,'su':pd[0],'sno':scan_i,'ubit':pd[2],'pms':adjusted_mass})
                else:
-                   eventsupport[event]=[{'count':pd[1],'s':pep,'su':pd[0],'sno':scan_i,'ubit':pd[2]}]
+                   eventsupport[event]=[{'count':pd[1],'s':pep,'su':pd[0],'sno':scan_i,'ubit':pd[2],'pms':adjusted_mass}]
                    
     outf=open(outputfile,"w")
     
@@ -294,6 +299,7 @@ def get_key(argv):
             scan_number=event_dic['sno']
             
             ubit=event_dic['ubit']
+            adjusted_mass=event_dic['pms']
             
             printsupport=support
             newpep=''
@@ -331,7 +337,7 @@ def get_key(argv):
                 
             fra=100.0*(float(count)/total)
     
-            outf.write("%s\t%s\t%s\t%f\t%s\t%s\t%d\t%0.2f\t%d\t%s\n" %(event,peptide[pep],pep,getpmasstotal(pep,ms_dict),printsupport,newpep,count,fra,scan_number,ubit))
+            outf.write("%s\t%s\t%s\t%f\t%s\t%s\t%d\t%0.2f\t%d\t%s\n" %(event,peptide[pep],pep,adjusted_mass,printsupport,newpep,count,fra,scan_number,ubit))
     outf.close()
 
 if __name__ == "__main__":
